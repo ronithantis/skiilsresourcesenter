@@ -142,6 +142,15 @@ main{max-width:1200px; margin:0 auto; padding:34px 24px 80px;}
 .file-actions{display:flex; gap:8px;}
 .file-actions .btn{min-height:40px; padding:0 16px; font-size:15px;}
 
+/* lesson progress */
+.done-badge{display:inline-flex; align-items:center; gap:6px; background:#E7F5EC; color:#1E7A43; border-radius:999px; padding:3px 12px; font-weight:700; font-size:12.5px;}
+.done-badge svg{width:14px; height:14px;}
+.progress-chip{background:var(--blue-100); color:var(--blue-700); border-radius:999px; padding:8px 18px; font-weight:700; font-size:15px; white-space:nowrap;}
+.btn-done{background:#E7F5EC; color:#1E7A43; border:2px solid #BFE3CD;}
+.btn-done:hover{border-color:#1E7A43;}
+.btn-done.is-done{background:#1E7A43; color:#fff; border-color:#1E7A43;}
+.card.is-done{border-color:#BFE3CD; background:linear-gradient(180deg, #FBFEFC, #fff);}
+
 /* inspiration videos */
 .video-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:16px;}
 .vcard{display:flex; flex-direction:column; gap:8px;}
@@ -207,6 +216,7 @@ footer{max-width:1200px; margin:0 auto; padding:0 24px 40px; color:var(--muted);
         <h2>30 מיומנויות לחיים ולעתיד</h2>
         <p>בחרו שיעור כדי לפתוח את כל חומרי ההכנה שלו.</p>
       </div>
+      <span class="progress-chip" id="progressChip"></span>
     </div>
     <div class="grid" id="cardGrid"></div>
     <div id="noResults">לא נמצאה מיומנות מתאימה. נסו מילה אחרת.</div>
@@ -320,12 +330,43 @@ async function tryLogin(code, silent) {
   document.getElementById('schoolChip').textContent = res.school;
   document.getElementById('footLicense').textContent = 'רישיון בתוקף עד ' + new Date(res.expires).toLocaleDateString('he-IL');
   buildGrid();
+  updateProgressChip();
   return true;
 }
 
 function logout() {
   localStorage.removeItem('lma_license');
   location.reload();
+}
+
+/* ---------- מעקב שיעורים שהועברו (לכל בית ספר לפי קוד רישיון) ---------- */
+function progressKey() { return 'lma_progress_' + (SESSION ? SESSION.code : 'anon'); }
+function getProgress() {
+  try { return JSON.parse(localStorage.getItem(progressKey())) || {}; } catch (e) { return {}; }
+}
+function isDone(id) { return !!getProgress()[id]; }
+function toggleDone(id) {
+  const p = getProgress();
+  if (p[id]) delete p[id]; else p[id] = new Date().toISOString().slice(0, 10);
+  localStorage.setItem(progressKey(), JSON.stringify(p));
+  /* Supabase (שלב 3): כאן תתווסף כתיבה לטבלת lesson_progress כדי שהסימון יסתנכרן בין כל המורים בבית הספר */
+  buildGrid(); filterCards(); updateProgressChip();
+  const btn = document.getElementById('doneBtn');
+  if (btn) renderDoneBtn(btn, id);
+  showToast(isDone(id) ? 'סומן: השיעור הועבר' : 'הסימון בוטל');
+}
+function updateProgressChip() {
+  const el = document.getElementById('progressChip');
+  if (!el) return;
+  const n = Object.keys(getProgress()).length;
+  el.textContent = 'הועברו ' + n + ' מתוך 30 שיעורים';
+}
+function renderDoneBtn(btn, id) {
+  const done = isDone(id);
+  btn.className = 'btn btn-done' + (done ? ' is-done' : '');
+  btn.innerHTML = done
+    ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg> השיעור הועבר — לחצו לביטול'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg> סמנו כשיעור שהועבר';
 }
 
 /* ---------- דף הבית ---------- */
@@ -338,12 +379,12 @@ function statusChip(l) {
 function buildGrid() {
   const g = document.getElementById('cardGrid');
   g.innerHTML = DATA.lessons.map((l, i) => `
-    <article class="card">
+    <article class="card${isDone(l.id) ? ' is-done' : ''}">
       <div class="tile">${ICONS[i] || ICONS[0]}<span class="num">${String(l.id).padStart(2, '0')}</span></div>
       <h3>${l.title}</h3>
       <p class="desc">${l.summary.what}</p>
       <div class="row">
-        ${statusChip(l)}
+        ${isDone(l.id) ? '<span class="done-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>הועבר</span>' : statusChip(l)}
         <button class="open" onclick="openLesson(${l.id})">פתיחת השיעור
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>
         </button>
@@ -413,7 +454,7 @@ function openLesson(id) {
       <div>
         <div class="eyebrow">שיעור ${l.id} מתוך 30</div>
         <h2>${l.title}</h2>
-        <div class="meta">${statusChip(l)}</div>
+        <div class="meta">${statusChip(l)} <button class="btn btn-done" id="doneBtn" onclick="toggleDone(${l.id})" style="min-height:42px; padding:0 16px; font-size:15px;"></button></div>
       </div>
     </div>
 
@@ -489,6 +530,7 @@ function openLesson(id) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>` : ''}
     </div>`;
 
+  renderDoneBtn(document.getElementById('doneBtn'), l.id);
   document.getElementById('viewHome').classList.add('hidden');
   v.classList.remove('hidden');
   window.scrollTo({ top: 0 });
