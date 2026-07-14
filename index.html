@@ -50,6 +50,31 @@ button{font-family:inherit; cursor:pointer; border:none; background:none; font-s
 .login-foot{color:var(--muted); font-size:14px; margin-top:18px;}
 .foot-legal{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:8px; padding-top:10px; border-top:1px solid var(--line); font-size:12.5px; color:var(--muted); line-height:1.6;}
 .foot-legal .terms-link{font-size:12.5px;}
+
+/* --- גישת מנחה צעיר --- */
+.sa-box{background:#F1F6FC; border:1.5px solid var(--line); border-right:4px solid var(--blue-600); border-radius:var(--r-sm); padding:16px 18px; margin-top:14px;}
+.sa-box h4{color:var(--blue-900); font-size:15.5px; font-weight:800; margin-bottom:4px;}
+.sa-box p{color:var(--muted); font-size:13.5px; line-height:1.65; margin-bottom:12px;}
+.sa-form{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+.sa-form input{flex:1; min-width:180px; border:1.5px solid var(--line); border-radius:var(--r-sm); padding:11px 13px; font-family:inherit; font-size:14.5px;}
+.sa-form input:focus{outline:none; border-color:var(--blue-600);}
+.sa-list{margin-top:14px; display:flex; flex-direction:column; gap:8px;}
+.sa-item{display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:var(--white); border:1.5px solid var(--line); border-radius:var(--r-sm); padding:10px 14px;}
+.sa-item .c{font-weight:900; letter-spacing:1px; color:var(--blue-900); direction:ltr; font-size:16px;}
+.sa-item .who{font-weight:700; color:var(--ink); font-size:14px;}
+.sa-item .exp{color:var(--muted); font-size:12.5px; margin-inline-start:auto;}
+.sa-item .btn{min-height:34px; padding:0 12px; font-size:13px;}
+
+/* --- מצב תלמיד: הסתרת ניווט --- */
+body.student-mode #searchBox,
+body.student-mode .crumbs,
+body.student-mode .bottom-back,
+body.student-mode #progressChip,
+body.student-mode .btn-done,
+body.student-mode .sa-box{display:none !important;}
+body.student-mode #brandHome{pointer-events:none;}
+.student-chip{display:none; background:#EAF7EF; border:1.5px solid #6CBF84; color:#1d5c33; border-radius:20px; padding:6px 14px; font-size:13.5px; font-weight:700;}
+body.student-mode .student-chip{display:inline-block;}
 .terms-row{display:flex; align-items:flex-start; gap:10px; background:#F1F6FC; border:1.5px solid var(--line); border-radius:var(--r-sm); padding:12px 14px; margin-top:4px;}
 .terms-row input[type=checkbox]{width:20px; height:20px; margin-top:2px; flex:none; accent-color:var(--blue-600); cursor:pointer;}
 .terms-row label{font-weight:500; font-size:14.5px; color:var(--ink); line-height:1.55; cursor:pointer;}
@@ -208,14 +233,14 @@ footer{max-width:1200px; margin:0 auto; padding:0 24px 40px; color:var(--muted);
     <h1>האקדמיה למיומנויות החיים</h1>
     <p class="sub">כל מה שצריך כדי להתכונן לשיעור — מחוונים, מצגות, דפי עבודה וכלים דיגיטליים — במקום אחד.</p>
     <label for="licenseInput">קוד רישיון בית ספרי</label>
-    <input id="licenseInput" placeholder="LMA-0000-0000" autocomplete="off" spellcheck="false">
+    <input id="licenseInput" placeholder="LMA-0000-0000  /  ST-000000" autocomplete="off" spellcheck="false">
     <div id="loginError"></div>
     <div class="terms-row">
       <input type="checkbox" id="termsCheck">
       <label for="termsCheck">קראתי ואני מאשר/ת את <button type="button" class="terms-link" id="termsOpen">תנאי השימוש והרישיון</button> של הקורס.</label>
     </div>
     <button class="btn btn-primary" id="loginBtn" style="width:100%; font-size:18px;">כניסה למרכז המשאבים</button>
-    <p class="login-foot">אין לכם קוד? הקוד נמסר לרכז/ת הקורס בבית הספר עם רכישת הקורס.</p>
+    <p class="login-foot">אין לכם קוד? הקוד נמסר לרכז/ת הקורס בבית הספר עם רכישת הקורס.<br>מנחים צעירים — הקוד שלכם מתחיל ב-ST ונמסר על ידי המורה.</p>
     <div class="copyright">
       כל הזכויות שמורות ל<b>״חטיפי למידה״ — חנציס דוד ניהול והשקעות בע״מ</b>.<br>
       התכנים, המצגות, הסרטונים, המחוונים ודפי העבודה מוגנים בזכויות יוצרים. השימוש בהם מותר לבית הספר בעל הרישיון בלבד, לתקופת הרישיון בלבד.
@@ -462,6 +487,96 @@ async function loadContent() {
   if (!DATA || !DATA.lessons) throw new Error('no-content');
 }
 
+/* ================== גישת מנחה צעיר ==================
+   המורה מנפיק קוד לשיעור אחד. הקוד תקף לשבועיים ולא מעבר לרישיון בית הספר.
+   התלמיד נכנס איתו ורואה את השיעור הזה בלבד — בלי דף בית ובלי שאר השיעורים. */
+
+let STUDENT = null;   // כשמלא: { code, school, lesson_id, expires, student }
+
+async function loadStudentCodes(lessonId) {
+  const box = document.getElementById('saList');
+  if (!box || STUDENT) return;
+  try {
+    const rows = await rpc('list_student_codes', { p_code: SESSION.code, p_lesson: lessonId }) || [];
+    box.innerHTML = rows.map(r => `
+      <div class="sa-item">
+        <span class="c">${r.code}</span>
+        ${r.student ? `<span class="who">${r.student}</span>` : ''}
+        <span class="exp">בתוקף עד ${new Date(r.expires).toLocaleDateString('he-IL')}${r.last_seen ? ' · נכנס/ה' : ' · טרם נכנס/ה'}</span>
+        <button class="btn btn-ghost" onclick="copyCode('${r.code}')">העתקה</button>
+        <button class="btn btn-ghost" onclick="revokeStudentCode('${r.code}', ${lessonId})">ביטול</button>
+      </div>`).join('');
+  } catch (e) { box.innerHTML = ''; }
+}
+
+async function makeStudentCode(lessonId) {
+  const nameEl = document.getElementById('saName');
+  const name = (nameEl.value || '').trim();
+  try {
+    const rows = await rpc('create_student_code', {
+      p_code: SESSION.code, p_lesson: lessonId, p_student: name || null, p_days: 14
+    });
+    const r = rows && rows[0];
+    if (!r || !r.code) { showToast('הקוד לא נוצר — נסו שוב'); return; }
+    nameEl.value = '';
+    await loadStudentCodes(lessonId);
+    copyCode(r.code);
+    showToast('הקוד ' + r.code + ' נוצר והועתק — בתוקף עד ' + new Date(r.expires).toLocaleDateString('he-IL'));
+  } catch (e) { showToast('שגיאה ביצירת הקוד'); }
+}
+
+function copyCode(code) {
+  navigator.clipboard.writeText(code).then(() => showToast('הקוד הועתק: ' + code)).catch(() => {});
+}
+
+async function revokeStudentCode(code, lessonId) {
+  if (!confirm('לבטל את הקוד ' + code + '?\nהתלמיד/ה לא יוכל/תוכל להיכנס יותר.')) return;
+  try {
+    await rpc('revoke_student_code', { p_code: SESSION.code, p_student_code: code });
+    await loadStudentCodes(lessonId);
+    showToast('הקוד בוטל');
+  } catch (e) { showToast('הביטול נכשל'); }
+}
+
+/* ---------- כניסת התלמיד ---------- */
+async function tryStudentLogin(code, silent) {
+  const err = document.getElementById('loginError');
+  try {
+    const rows = await rpc('check_student_code', { p_code: code });
+    const r = rows && rows[0];
+    if (!r || !r.ok) {
+      if (!silent && r && r.msg) { err.textContent = r.msg === 'קוד שגוי' ? 'הקוד שגוי.' : r.msg + '. פנו למורה.'; err.style.display = 'block'; }
+      localStorage.removeItem('lma_student');
+      return false;
+    }
+    const lesson = await rpc('get_lesson_for_student', { p_code: code });
+    if (!lesson) { if (!silent) { err.textContent = 'השיעור לא נטען. נסו שוב.'; err.style.display = 'block'; } return false; }
+
+    STUDENT = { code: code.trim().toUpperCase(), school: r.school, lesson_id: r.lesson_id, expires: r.expires, student: r.student };
+    SESSION = { code: STUDENT.code, school: r.school + ' · מנחה צעיר', expires: r.expires };
+    DATA = { lessons: [lesson] };
+    PROGRESS = {};
+    localStorage.setItem('lma_student', STUDENT.code);
+
+    document.body.classList.add('student-mode');
+    document.getElementById('viewLogin').classList.add('hidden');
+    document.getElementById('viewApp').classList.remove('hidden');
+    document.getElementById('schoolChip').textContent = r.school;
+    document.getElementById('footLicense').textContent = 'גישת מנחה צעיר · בתוקף עד ' + new Date(r.expires).toLocaleDateString('he-IL');
+    openLesson(lesson.id);
+    return true;
+  } catch (e) {
+    if (!silent) { err.textContent = 'שגיאת תקשורת. נסו שוב.'; err.style.display = 'block'; }
+    return false;
+  }
+}
+
+/* ניתוב: קוד שמתחיל ב-ST הוא של תלמיד */
+function routeLogin(code, silent) {
+  const c = (code || '').trim().toUpperCase();
+  return /^ST-/.test(c) ? tryStudentLogin(c, silent) : tryLogin(c, silent);
+}
+
 /* ---------- כניסה ויציאה ---------- */
 async function tryLogin(code, silent) {
   const res = await validateLicense(code);
@@ -491,6 +606,9 @@ async function tryLogin(code, silent) {
 
 function logout() {
   localStorage.removeItem('lma_license');
+  localStorage.removeItem('lma_student');
+  STUDENT = null;
+  document.body.classList.remove('student-mode');
   location.reload();
 }
 
@@ -505,6 +623,7 @@ async function loadProgress() {
 }
 function isDone(id) { return !!PROGRESS[id]; }
 function toggleDone(id) {
+  if (STUDENT) return;
   const nowDone = !PROGRESS[id];
   if (nowDone) PROGRESS[id] = true; else delete PROGRESS[id];
   rpc('set_lesson_done', { p_code: SESSION.code, p_lesson: id, p_done: nowDone })
@@ -568,6 +687,9 @@ function openLesson(id) {
   const l = DATA.lessons.find(x => x.id === id);
   const idx = DATA.lessons.indexOf(l);
   const v = document.getElementById('viewLesson');
+  /* בגישת מנחה צעיר קיים שיעור אחד בלבד — אין ניווט קודם/הבא */
+  const nextL = DATA.lessons.find(x => x.id === id + 1) || null;
+  const prevL = DATA.lessons.find(x => x.id === id - 1) || null;
 
   const embed = l.genially.embed
     ? `<div class="embed-wrap" id="embedWrap">${l.genially.embed}
@@ -665,6 +787,15 @@ function openLesson(id) {
 
     <section class="section">
       <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h13l3 3v13H4z"/><path d="M8 4v5h8V4"/></svg>המחוון למנחה</h3>
+      <div class="sa-box" id="saBox">
+        <h4>גישה למנחה הצעיר</h4>
+        <p>הפיקו קוד אישי לתלמיד/ה שמעביר/ה את השיעור הזה. הקוד פותח <b>רק את שיעור ${l.id}</b>, תקף לשבועיים, ופג מעצמו. הקוד אינו נותן גישה לשאר השיעורים.</p>
+        <div class="sa-form">
+          <input id="saName" placeholder="שם המנחה הצעיר (רשות)" maxlength="40">
+          <button class="btn btn-primary" onclick="makeStudentCode(${l.id})">הפקת קוד לתלמיד/ה</button>
+        </div>
+        <div class="sa-list" id="saList"></div>
+      </div>
       <div class="rubric-actions">
         <button class="btn btn-primary" onclick="printRubric(${l.id})">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V3h12v6"/><rect x="4" y="9" width="16" height="8" rx="2"/><path d="M7 17h10v4H7z"/></svg>
@@ -680,22 +811,24 @@ function openLesson(id) {
     </section>
 
     <div class="bottom-back">
-      ${l.id < 30 ? `<button class="btn btn-ghost" onclick="openLesson(${l.id + 1})">
+      ${nextL ? `<button class="btn btn-ghost" onclick="openLesson(${nextL.id})">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>
-        לשיעור הבא: ${DATA.lessons.find(x => x.id === l.id + 1).title}</button>` : ''}
+        לשיעור הבא: ${nextL.title}</button>` : ''}
       <button class="btn btn-ghost" onclick="goHome()">כל המיומנויות</button>
-      ${l.id > 1 ? `<button class="btn btn-ghost" onclick="openLesson(${l.id - 1})">
-        לשיעור הקודם: ${DATA.lessons.find(x => x.id === l.id - 1).title}
+      ${prevL ? `<button class="btn btn-ghost" onclick="openLesson(${prevL.id})">
+        לשיעור הקודם: ${prevL.title}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>` : ''}
     </div>`;
 
   renderDoneBtn(document.getElementById('doneBtn'), l.id);
+  if (!STUDENT) loadStudentCodes(l.id);
   document.getElementById('viewHome').classList.add('hidden');
   v.classList.remove('hidden');
   window.scrollTo({ top: 0 });
 }
 
 function goHome() {
+  if (STUDENT) return;   /* למנחה צעיר אין דף בית — רק השיעור שלו */
   document.getElementById('viewLesson').classList.add('hidden');
   document.getElementById('viewHome').classList.remove('hidden');
   window.scrollTo({ top: 0 });
@@ -818,7 +951,9 @@ function printRubric(id) {
 const FILE_CACHE = {};
 async function fetchFile(fid) {
   if (FILE_CACHE[fid]) return FILE_CACHE[fid];
-  const rows = await rpc('get_file', { p_code: SESSION.code, p_file_id: fid });
+  const rows = STUDENT
+    ? await rpc('get_file_for_student', { p_code: STUDENT.code, p_file_id: fid })
+    : await rpc('get_file', { p_code: SESSION.code, p_file_id: fid });
   const d = rows && rows[0];
   if (!d || !d.b64) return null;
   const bin = atob(d.b64), arr = new Uint8Array(bin.length);
@@ -834,8 +969,12 @@ async function fetchFile(fid) {
 const WM_COPY = '© ״חטיפי למידה״ — חנציס דוד ניהול והשקעות בע״מ · כל הזכויות שמורות';
 
 function wmLine() {
-  const school = (SESSION && SESSION.school) ? SESSION.school : '';
   const exp = (SESSION && SESSION.expires) ? new Date(SESSION.expires).toLocaleDateString('he-IL') : '';
+  if (STUDENT) {
+    const who = STUDENT.student ? ' · ' + STUDENT.student : '';
+    return `מנחה צעיר${who} · בית ספר ${STUDENT.school} · שיעור ${STUDENT.lesson_id} · בתוקף עד ${exp}`;
+  }
+  const school = (SESSION && SESSION.school) ? SESSION.school : '';
   return `השימוש מורשה לבית ספר ${school} בלבד · בתוקף עד ${exp}`;
 }
 
@@ -1077,7 +1216,7 @@ function termsOk() {
   return false;
 }
 
-function attemptLogin(code) { if (!termsOk()) return; tryLogin(code); }
+function attemptLogin(code) { if (!termsOk()) return; routeLogin(code); }
 
 document.getElementById('loginBtn').addEventListener('click', () => attemptLogin(document.getElementById('licenseInput').value));
 document.getElementById('licenseInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(e.target.value); });
@@ -1085,10 +1224,14 @@ document.getElementById('logoutBtn').addEventListener('click', logout);
 document.getElementById('searchInput').addEventListener('input', filterCards);
 document.getElementById('coverImg').src = COVER_IMG;
 
+const savedStudent = localStorage.getItem('lma_student');
 const saved = localStorage.getItem('lma_license');
 const savedTerms = localStorage.getItem('lma_terms') === TERMS_VERSION;
 if (savedTerms) termsCheck.checked = true;
-if (saved) {
+if (savedStudent) {
+  document.getElementById('licenseInput').value = savedStudent;
+  if (savedTerms) tryStudentLogin(savedStudent, true);
+} else if (saved) {
   document.getElementById('licenseInput').value = saved;
   if (savedTerms) tryLogin(saved, true);
 }
