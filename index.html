@@ -48,6 +48,29 @@ button{font-family:inherit; cursor:pointer; border:none; background:none; font-s
 #licenseInput:focus{border-color:var(--blue-600); outline:none;}
 #loginError{display:none; background:#FDEDED; color:#A13030; border-radius:var(--r-sm); padding:12px 16px; font-weight:500; font-size:15px;}
 .login-foot{color:var(--muted); font-size:14px; margin-top:18px;}
+.foot-legal{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:8px; padding-top:10px; border-top:1px solid var(--line); font-size:12.5px; color:var(--muted); line-height:1.6;}
+.foot-legal .terms-link{font-size:12.5px;}
+.terms-row{display:flex; align-items:flex-start; gap:10px; background:#F1F6FC; border:1.5px solid var(--line); border-radius:var(--r-sm); padding:12px 14px; margin-top:4px;}
+.terms-row input[type=checkbox]{width:20px; height:20px; margin-top:2px; flex:none; accent-color:var(--blue-600); cursor:pointer;}
+.terms-row label{font-weight:500; font-size:14.5px; color:var(--ink); line-height:1.55; cursor:pointer;}
+.terms-link{background:none; border:none; padding:0; font:inherit; font-weight:700; color:var(--blue-600); text-decoration:underline; cursor:pointer;}
+.terms-link:hover{color:var(--blue-900);}
+.copyright{margin-top:22px; padding-top:16px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; line-height:1.7;}
+.copyright b{color:var(--blue-900); font-weight:700;}
+#termsModal{position:fixed; inset:0; z-index:200; background:rgba(10,20,35,.62); display:none; align-items:center; justify-content:center; padding:24px;}
+#termsModal.open{display:flex;}
+.terms-box{background:var(--white); border-radius:var(--r-md); width:min(860px,100%); max-height:88vh; display:flex; flex-direction:column; box-shadow:0 30px 90px rgba(0,0,0,.4);}
+.terms-head{padding:20px 26px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:16px;}
+.terms-head h2{color:var(--blue-900); font-size:21px; font-weight:900;}
+.terms-head .x{background:none; border:none; font-size:26px; line-height:1; color:var(--muted); cursor:pointer; padding:4px 8px;}
+.terms-body{padding:22px 26px; overflow-y:auto; font-size:14.5px; line-height:1.75; color:var(--ink);}
+.terms-body h3{color:var(--blue-900); font-size:16px; font-weight:800; margin:20px 0 8px;}
+.terms-body h3:first-child{margin-top:0;}
+.terms-body p{margin-bottom:8px;}
+.terms-body ol{padding-right:20px; margin-bottom:8px;}
+.terms-body li{margin-bottom:6px;}
+.terms-body .meta{background:#F1F6FC; border-right:3px solid var(--blue-600); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:16px; font-size:14px;}
+.terms-foot{padding:16px 26px; border-top:1px solid var(--line); display:flex; gap:12px; justify-content:flex-start;}
 @media (max-width:900px){
   #viewLogin{grid-template-columns:1fr;}
   .login-art{display:none;}
@@ -187,10 +210,124 @@ footer{max-width:1200px; margin:0 auto; padding:0 24px 40px; color:var(--muted);
     <label for="licenseInput">קוד רישיון בית ספרי</label>
     <input id="licenseInput" placeholder="LMA-0000-0000" autocomplete="off" spellcheck="false">
     <div id="loginError"></div>
+    <div class="terms-row">
+      <input type="checkbox" id="termsCheck">
+      <label for="termsCheck">קראתי ואני מאשר/ת את <button type="button" class="terms-link" id="termsOpen">תנאי השימוש והרישיון</button> של הקורס.</label>
+    </div>
     <button class="btn btn-primary" id="loginBtn" style="width:100%; font-size:18px;">כניסה למרכז המשאבים</button>
     <p class="login-foot">אין לכם קוד? הקוד נמסר לרכז/ת הקורס בבית הספר עם רכישת הקורס.</p>
+    <div class="copyright">
+      כל הזכויות שמורות ל<b>״חטיפי למידה״ — חנציס דוד ניהול והשקעות בע״מ</b>.<br>
+      התכנים, המצגות, הסרטונים, המחוונים ודפי העבודה מוגנים בזכויות יוצרים. השימוש בהם מותר לבית הספר בעל הרישיון בלבד, לתקופת הרישיון בלבד.
+    </div>
   </section>
   <aside class="login-art"><img id="coverImg" alt="האקדמיה למיומנויות החיים"></aside>
+</div>
+
+
+<div id="termsModal" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+  <div class="terms-box">
+    <div class="terms-head">
+      <h2 id="termsTitle">תנאי שימוש ורישיון — האקדמיה למיומנויות החיים</h2>
+      <button class="x" id="termsClose" aria-label="סגירה">&times;</button>
+    </div>
+    <div class="terms-body" id="termsBody">
+      <div class="meta">
+        <b>מפעיל הקורס:</b> ״חטיפי למידה״ — חנציס דוד ניהול והשקעות בע״מ<br>
+        <b>דוא״ל:</b> mekuvanim@gmail.com &nbsp;·&nbsp; <b>טלפון:</b> 052-6535934<br>
+        <b>הקורס:</b> האקדמיה למיומנויות החיים — 30 שיעורי מיומנויות לכיתות ה׳–ח׳<br>
+        <b>גרסה:</b> 1.0 &nbsp;·&nbsp; <b>עדכון אחרון:</b> יולי 2026
+      </div>
+
+      <p>הסכם זה מסדיר את תנאי הגישה, השימוש והרישיון בקורס הדיגיטלי ״האקדמיה למיומנויות החיים״ וכלל התכנים הכלולים בו — המערכים, המחוונים, המצגות, הסרטונים, דפי העבודה, הטקסטים, התמונות, הגרפיקה, הכלים הדיגיטליים וכל חומר נלווה אחר (להלן יחד: ״הקורס״ או ״חומרי הקורס״).</p>
+      <p>עצם הרכישה, ההתחברות, הגישה או השימוש בקורס על ידי בית הספר, עובדיו, אנשי צוות ההוראה, תלמידיו או מי מטעמו (להלן יחד: ״המשתמשים״), מהווים אישור והסכמה מלאה ומפורשת לתנאי הסכם זה.</p>
+
+      <h3>1. הענקת רישיון שימוש מוגבל</h3>
+      <ol>
+        <li>בכפוף לתשלום מלוא התמורה ולעמידה בתנאי הסכם זה, מוענק לבית הספר רישיון שימוש מוגבל, אישי, הדיר, לא בלעדי, בלתי סחיר ובלתי ניתן להעברה, לצורך שימוש פנימי-פדגוגי בלבד במסגרת פעילותו החינוכית.</li>
+        <li>הרישיון מוגבל לבית הספר שרכש את המנוי ולמשתמשים המורשים מטעמו בלבד, ואינו מקנה זכות שימוש לכל גוף קשור, רשת חינוך, מוסד אחר, סניף אחר או צד שלישי, אלא באישור מראש ובכתב ממפעיל הקורס.</li>
+        <li>אין בהענקת הרישיון כדי להקנות זכות בעלות, קניין, העתקה או מסחור בחומרי הקורס, למעט זכות שימוש מוגבלת כאמור.</li>
+      </ol>
+
+      <h3>2. תקופת הרישיון</h3>
+      <ol>
+        <li>רישיון השימוש יעמוד בתוקפו למשך שנת הלימודים שלשמה נרכש המנוי בלבד — מיום הפקת קוד הרישיון ועד למועד הפקיעה הנקוב בו, ולא יאוחר מתום שנת הלימודים הרלוונטית (להלן: ״תקופת הרישיון״). מועד הפקיעה מוצג למשתמש בתחתית מסך המערכת.</li>
+        <li>בתום תקופת הרישיון יפקע הרישיון באופן אוטומטי ומיידי, ללא צורך בהודעה נוספת, אלא אם חודש המנוי בתשלום עבור תקופת רישיון חדשה.</li>
+        <li>עם פקיעת הרישיון תסתיים כל זכות גישה, צפייה, שימוש, הורדה, הצגה, העתקה, הדפסה או הסתמכות על חומרי הקורס — לרבות חומרים שנשמרו, הודפסו או הורדו כדין במהלך תקופת הרישיון.</li>
+        <li>עם תום תקופת הרישיון על בית הספר לחדול מכל שימוש בחומרי הקורס, ולהסיר, למחוק או להשמיד כל עותק דיגיטלי או פיזי המצוי ברשותו או ברשות מי מטעמו.</li>
+      </ol>
+
+      <h3>3. קניין רוחני וזכויות יוצרים</h3>
+      <ol>
+        <li>כלל הזכויות בקורס ובחומרי הקורס — לרבות זכויות יוצרים, זכויות מבצעים, זכויות מוסריות, קניין רוחני וסודות מסחריים — שייכות באופן בלעדי למפעיל הקורס ו/או למי שהרשה לו לעשות בהם שימוש כדין.</li>
+        <li>חומרי הקורס מוגנים לפי דיני זכויות היוצרים והקניין הרוחני בישראל ומחוצה לה.</li>
+        <li>אין בהסכם זה, ברכישת מנוי או במתן גישה לקורס, משום ויתור על זכויות מפעיל הקורס או הענקת רישיון מכללא החורג מן המותר במפורש.</li>
+      </ol>
+
+      <h3>4. איסור העברה, שיתוף ושימוש מעבר לתקופת המנוי</h3>
+      <ol>
+        <li>חל איסור מוחלט להעביר, למסור, לשתף, לפרסם, להפיץ, להעמיד לרשות הציבור, למכור, להשכיר, להקרין מחוץ לבית הספר, לשכפל, להעתיק, לעבד, לתרגם, לשדר או לעשות כל שימוש אחר בחומרי הקורס לטובת גורם שאינו בית הספר בעל הרישיון ומשתמשיו המורשים.</li>
+        <li>בכלל זה חל איסור מפורש להעביר את חומרי הקורס, או לאפשר גישה אליהם, לבתי ספר אחרים, מוסדות חינוך אחרים, רשתות חינוך, עמותות, מורים חיצוניים, מדריכים, הורים, ספקים, יועצים או כל צד שלישי.</li>
+        <li>חל איסור לעשות שימוש חוזר בחומרי הקורס לאחר תום תקופת הרישיון, לרבות בשנת לימודים עוקבת, ללא חידוש מנוי בתשלום.</li>
+        <li>האיסור חל גם על חומרים שהודפסו, נשמרו, הועתקו, הוטמעו במערכי שיעור, הועלו למערכות פנימיות או הורדו כדין במהלך תקופת הרישיון.</li>
+      </ol>
+
+      <h3>5. הורדה, הדפסה ושימוש מותר בחומרים</h3>
+      <ol>
+        <li>קבצים המסומנים במערכת ככאלה הניתנים להורדה או להדפסה (דפי עבודה, מחוונים, כרטיסיות, מכתבים) — מותרים להורדה ולהדפסה לצורך שימוש פנימי-פדגוגי של בית הספר, במהלך תקופת הרישיון בלבד.</li>
+        <li>מותר לחלק עותקים מודפסים של דפי עבודה לתלמידי בית הספר לצורך השיעור עצמו. אין בכך כדי להקנות זכות שימוש לאחר תום תקופת הרישיון.</li>
+        <li>למעט האמור לעיל, חל איסור להוריד, לשמור, לגבות, לאחסן או להעתיק את חומרי הקורס — ובפרט סרטונים, מצגות ומערכי הוראה — לשרת בית ספרי, כונן משותף, ענן מוסדי, Google Drive, OneDrive, Dropbox או כל מאגר דיגיטלי אחר.</li>
+        <li>אין להעלות את חומרי הקורס, כולם או חלקם, לרשתות חברתיות, לאתרי שיתוף, לקבוצות מורים או לכל פלטפורמה פומבית או חצי-פומבית.</li>
+      </ol>
+
+      <h3>6. פרטי גישה ואבטחת חשבון</h3>
+      <ol>
+        <li>קוד הרישיון וכל אמצעי זיהוי אחר הם חסויים, ומיועדים לשימוש המשתמשים המורשים של בית הספר בלבד.</li>
+        <li>חל איסור מוחלט לשתף, למסור או להפיץ את קוד הרישיון לכל גורם שאינו משתמש מורשה מטעם בית הספר.</li>
+        <li>בית הספר יישא באחריות מלאה לכל שימוש שייעשה בקוד הרישיון שהוקצה לו, בין אם בהרשאתו ובין אם לאו, למעט אם הודיע למפעיל הקורס ללא דיחוי על שימוש בלתי מורשה ונקט אמצעים סבירים למניעתו.</li>
+        <li>בית הספר יעדכן את מפעיל הקורס ללא דיחוי בכל חשד לדליפת הקוד. מפעיל הקורס יהיה רשאי להנפיק קוד חלופי.</li>
+      </ol>
+
+      <h3>7. פרטיות ומידע אישי</h3>
+      <ol>
+        <li>המערכת אוספת ושומרת מידע מינימלי הנדרש לתפעול הרישיון בלבד: שם בית הספר, פרטי איש קשר שנמסרו בעת הרכישה, מועד הכניסה האחרון למערכת, ורשימת השיעורים שסומנו כ״הועברו״.</li>
+        <li>המערכת אינה אוספת ואינה שומרת מידע אישי על תלמידים.</li>
+        <li>המידע משמש לצורך ניהול הרישיון ומתן השירות בלבד, ואינו מועבר לצדדים שלישיים למטרות שיווק.</li>
+        <li>בית הספר אחראי לכל מידע אישי שהוא עצמו יבקש להזין לכלים דיגיטליים חיצוניים המשולבים בקורס, בהתאם לדין החל עליו.</li>
+      </ol>
+
+      <h3>8. זמינות השירות והיעדר אחריות</h3>
+      <ol>
+        <li>הקורס מסופק כמות שהוא (AS IS). מפעיל הקורס עושה מאמצים סבירים לשמור על זמינות המערכת, אך אינו מתחייב לזמינות רציפה או נטולת תקלות.</li>
+        <li>חלק מהתכנים מוצגים באמצעות שירותי צד שלישי (לרבות מצגות, סרטונים וכלים דיגיטליים). מפעיל הקורס אינו אחראי להפסקות או שינויים בשירותים אלה.</li>
+        <li>מפעיל הקורס רשאי לעדכן, לשפר, להוסיף או לשנות תכנים ופיצ׳רים בקורס מעת לעת, ובלבד שלא תיפגע מהותית התועלת הפדגוגית של הקורס.</li>
+      </ol>
+
+      <h3>9. הפרה, אכיפה וסעדים</h3>
+      <ol>
+        <li>כל שימוש בחומרי הקורס בניגוד להסכם זה — לרבות שימוש מעבר לתקופת הרישיון, שימוש בשנה עוקבת ללא חידוש, העברת חומרים לצד שלישי, שיתוף קוד הגישה או יצירת עותקים בלתי מורשים — יהווה הפרה יסודית של ההסכם והפרה של זכויות הקניין הרוחני של מפעיל הקורס.</li>
+        <li>במקרה של הפרה או חשד סביר להפרה, יהא מפעיל הקורס רשאי, לפי שיקול דעתו הבלעדי: לחסום, להשעות או לבטל מיידית את גישת בית הספר לקורס; לדרוש הפסקת ההפרה; לדרוש מחיקה או השמדה של חומרי הקורס; לשלול זכאות להחזר כספי; ולנקוט בכל הליך משפטי, לרבות תביעה לצו מניעה, אכיפה ופיצויים.</li>
+        <li>מפעיל הקורס יהא רשאי לתבוע פיצויים בגין כל נזק, לרבות פיצויים ללא הוכחת נזק לפי חוק זכות יוצרים, התשס״ח-2007, וכן הוצאות משפט ושכר טרחת עורך דין.</li>
+      </ol>
+
+      <h3>10. שונות</h3>
+      <ol>
+        <li>הסכם זה מהווה את מלוא ההסכמות בין הצדדים בנוגע לשימוש בקורס, וגובר על כל מצג או הבנה קודמים.</li>
+        <li>אי-מימוש זכות מזכויות מפעיל הקורס לא ייחשב כוויתור עליה.</li>
+        <li>אם ייקבע כי הוראה מהוראות ההסכם אינה תקפה או אכיפה, לא יהא בכך כדי לפגוע ביתר ההוראות.</li>
+        <li>מפעיל הקורס רשאי לעדכן את תנאי השימוש מעת לעת. הנוסח המחייב הוא זה המוצג במערכת במועד הכניסה.</li>
+        <li>על הסכם זה יחולו דיני מדינת ישראל, ולבתי המשפט המוסמכים במחוז תל אביב תהא סמכות השיפוט הבלעדית.</li>
+      </ol>
+
+      <h3>11. אישור והסכמה</h3>
+      <p>בסימון תיבת האישור ובכניסה למערכת, בית הספר והמשתמשים מטעמו מאשרים כי קראו את תנאי הסכם זה, הבינו אותם, והם מסכימים להיות כפופים להם במלואם.</p>
+      <p style="margin-top:16px; color:var(--muted); font-size:13.5px;">לשאלות, בקשות אישור חריג או חידוש מנוי: mekuvanim@gmail.com · 052-6535934</p>
+    </div>
+    <div class="terms-foot">
+      <button class="btn btn-primary" id="termsAgree">קראתי ואני מאשר/ת</button>
+      <button class="btn" id="termsDismiss">סגירה</button>
+    </div>
+  </div>
 </div>
 
 <!-- ===================== APP ===================== -->
@@ -229,6 +366,10 @@ footer{max-width:1200px; margin:0 auto; padding:0 24px 40px; color:var(--muted);
 <footer>
   <span>© האקדמיה למיומנויות החיים — חטיפי למידה</span>
   <span id="footLicense"></span>
+  <div class="foot-legal">
+    <span>© ״חטיפי למידה״ — חנציס דוד ניהול והשקעות בע״מ · כל הזכויות שמורות</span>
+    <button type="button" class="terms-link" onclick="openTerms()">תנאי השימוש והרישיון</button>
+  </div>
 </footer>
 </div>
 
@@ -641,7 +782,16 @@ function printRubric(id) {
     .step{border:1.5px solid #C9D5E4; border-radius:10px; padding:9px;}
     .step b{display:block; margin-bottom:2px;}
     .sn{display:inline-flex; width:20px; height:20px; border-radius:6px; background:#12325A; color:#fff; align-items:center; justify-content:center; font-size:10pt; margin-left:6px;}
-    footer{position:fixed; bottom:0; right:0; left:0; font-size:9pt; color:#888; display:flex; justify-content:space-between;}
+    footer{position:fixed; bottom:14mm; right:0; left:0; font-size:9pt; color:#888; display:flex; justify-content:space-between;}
+    .wm{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none;}
+    .wm span{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-30deg);
+      white-space:nowrap; font-weight:700; font-size:15pt; color:#12325A; opacity:.13;}
+    .wm span:nth-child(1){margin-top:-90mm}.wm span:nth-child(2){margin-top:-60mm}
+    .wm span:nth-child(3){margin-top:-30mm}.wm span:nth-child(4){margin-top:0}
+    .wm span:nth-child(5){margin-top:30mm}.wm span:nth-child(6){margin-top:60mm}
+    .wm span:nth-child(7){margin-top:90mm}
+    .legal{position:fixed; bottom:8mm; right:0; left:0; text-align:center; font-size:7.5pt; color:#5A6B80; line-height:1.5;}
+    .legal b{color:#12325A;}
   </style></head><body>
     <header>
       <div class="tile">${String(l.id).padStart(2, '0')}</div>
@@ -649,6 +799,8 @@ function printRubric(id) {
     </header>
     ${summaryBlock}
     ${sections}
+    <div class="wm">${Array(7).fill('<span>' + wmLine() + '</span>').join('')}</div>
+    <div class="legal"><b>${wmLine()}</b><br>${WM_COPY}</div>
     <footer><span>האקדמיה למיומנויות החיים — חטיפי למידה</span><span>שיעור ${l.id} · ${l.title}</span></footer>
   </body></html>`;
 
@@ -675,6 +827,139 @@ async function fetchFile(fid) {
   return FILE_CACHE[fid];
 }
 
+/* ================== סימני מים ==================
+   נוצרים בזמן אמת לפי בית הספר המחובר. לא נשמרים בשום קובץ בענן.
+   התצוגה במערכת נשארת נקייה — הסימן מופיע רק בהדפסה ובהורדה. */
+
+const WM_COPY = '© ״חטיפי למידה״ — חנציס דוד ניהול והשקעות בע״מ · כל הזכויות שמורות';
+
+function wmLine() {
+  const school = (SESSION && SESSION.school) ? SESSION.school : '';
+  const exp = (SESSION && SESSION.expires) ? new Date(SESSION.expires).toLocaleDateString('he-IL') : '';
+  return `השימוש מורשה לבית ספר ${school} בלבד · בתוקף עד ${exp}`;
+}
+
+/* דפי עבודה שתלמידים כותבים עליהם — פס תחתון בלבד, בלי אלכסוני */
+function wmFooterOnly(f) {
+  return /דף עבודה|דף גזירה/.test((f && f.type) || '');
+}
+
+/* מצייר את שכבת סימן המים על גבי קנבס נתון */
+function wmPaint(ctx, w, h, footerOnly) {
+  const line = wmLine();
+  const base = Math.max(w, h);
+
+  if (!footerOnly) {
+    const size = Math.round(base * 0.026);
+    ctx.save();
+    ctx.globalAlpha = 0.13;
+    ctx.fillStyle = '#12325A';
+    ctx.font = `700 ${size}px Heebo, Arial, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.translate(w / 2, h / 2);
+    ctx.rotate(-Math.PI / 6);
+    const stepY = size * 6.5;
+    const diag = Math.sqrt(w * w + h * h);
+    for (let y = -diag / 2; y <= diag / 2; y += stepY) {
+      ctx.fillText(line, 0, y);
+    }
+    ctx.restore();
+  }
+
+  /* פס תחתון — תמיד */
+  const fs = Math.max(9, Math.round(base * 0.0125));
+  const pad = Math.round(fs * 0.7);
+  const barH = fs * 2 + pad * 2;
+  ctx.save();
+  ctx.globalAlpha = 0.92;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, h - barH, w, barH);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#C9D5E4';
+  ctx.fillRect(0, h - barH, w, Math.max(1, fs * 0.09));
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#12325A';
+  ctx.font = `700 ${fs}px Heebo, Arial, sans-serif`;
+  ctx.fillText(line, w / 2, h - barH + pad + fs * 0.55);
+  ctx.fillStyle = '#5A6B80';
+  ctx.font = `400 ${Math.round(fs * 0.88)}px Heebo, Arial, sans-serif`;
+  ctx.fillText(WM_COPY, w / 2, h - barH + pad + fs * 1.7);
+  ctx.restore();
+}
+
+/* תמונה + סימן מים -> blob URL חדש */
+function wmImage(url, footerOnly) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      wmPaint(ctx, c.width, c.height, footerOnly);
+      c.toBlob(b => b ? resolve(URL.createObjectURL(b)) : reject(new Error('blob')), 'image/jpeg', 0.92);
+    };
+    img.onerror = () => reject(new Error('image'));
+    img.src = url;
+  });
+}
+
+/* טעינה עצלה של pdf-lib — רק כשמדפיסים/מורידים PDF בפעם הראשונה */
+let PDFLIB_P = null;
+function loadPdfLib() {
+  if (window.PDFLib) return Promise.resolve(window.PDFLib);
+  if (!PDFLIB_P) {
+    PDFLIB_P = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+      s.onload = () => resolve(window.PDFLib);
+      s.onerror = () => reject(new Error('pdf-lib'));
+      document.head.appendChild(s);
+    });
+  }
+  return PDFLIB_P;
+}
+
+/* PDF + סימן מים: מייצרים שכבת PNG שקופה בקנבס (עברית נכונה!) ומטמיעים בכל עמוד */
+async function wmPdf(url, footerOnly) {
+  const PDFLib = await loadPdfLib();
+  const bytes = await (await fetch(url)).arrayBuffer();
+  const pdf = await PDFLib.PDFDocument.load(bytes);
+  const pages = pdf.getPages();
+  const cache = {};
+  for (const page of pages) {
+    const { width, height } = page.getSize();
+    const key = Math.round(width) + 'x' + Math.round(height);
+    if (!cache[key]) {
+      const scale = 2;
+      const c = document.createElement('canvas');
+      c.width = Math.round(width * scale);
+      c.height = Math.round(height * scale);
+      const ctx = c.getContext('2d');
+      ctx.scale(scale, scale);
+      wmPaint(ctx, width, height, footerOnly);
+      const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+      cache[key] = await pdf.embedPng(await blob.arrayBuffer());
+    }
+    page.drawImage(cache[key], { x: 0, y: 0, width, height });
+  }
+  const out = await pdf.save();
+  return URL.createObjectURL(new Blob([out], { type: 'application/pdf' }));
+}
+
+/* מחזיר URL עם סימן מים; אם משהו נכשל — מחזיר את המקורי */
+async function wmFile(f, url, isImage) {
+  const footerOnly = wmFooterOnly(f);
+  try {
+    return isImage ? await wmImage(url, footerOnly) : await wmPdf(url, footerOnly);
+  } catch (e) {
+    showToast('סימן המים לא הוטמע (בדקו חיבור לאינטרנט) — הקובץ יסופק כמות שהוא');
+    return url;
+  }
+}
+
 async function fileAction(lessonId, fileId, action) {
   const l = DATA.lessons.find(x => x.id === lessonId);
   const f = l.files.find(x => x.id === fileId);
@@ -685,8 +970,13 @@ async function fileAction(lessonId, fileId, action) {
   const url = d.url;
   const isImage = (d.mime || '').startsWith('image') || /תמונה/.test(f.type || '');
 
+  if (action === 'download' || action === 'print') showToast('מכין את הקובץ…');
+  const outUrl = (action === 'download' || action === 'print')
+    ? await wmFile(f, url, isImage)
+    : url;
+
   if (action === 'download') {
-    const a = document.createElement('a'); a.href = url;
+    const a = document.createElement('a'); a.href = outUrl;
     a.download = f.name + (isImage ? '.jpg' : '.pdf');
     a.click(); showToast('הקובץ ירד למחשב');
     return;
@@ -696,7 +986,7 @@ async function fileAction(lessonId, fileId, action) {
     // הדפסת תמונה — דרך עמוד פנימי (srcdoc, ללא חלון חיצוני)
     const frame = document.getElementById('printFrame');
     frame.removeAttribute('src');
-    frame.srcdoc = `<html dir="rtl"><head><style>@page{size:A4;margin:12mm}body{margin:0}img{width:100%}</style></head><body><img src="${url}" onload="setTimeout(()=>print(),200)"></body></html>`;
+    frame.srcdoc = `<html dir="rtl"><head><style>@page{size:A4;margin:12mm}body{margin:0}img{width:100%}</style></head><body><img src="${outUrl}" onload="setTimeout(()=>print(),200)"></body></html>`;
     showToast('נפתח חלון הדפסה');
     return;
   }
@@ -706,12 +996,12 @@ async function fileAction(lessonId, fileId, action) {
     try {
       const frame = document.getElementById('printFrame');
       frame.removeAttribute('srcdoc');
-      frame.src = url;
+      frame.src = outUrl;
       frame.onload = () => {
         try { frame.contentWindow.focus(); frame.contentWindow.print(); }
-        catch (e) { openViewer(f, url, isImage); showToast('להדפסה — השתמשו בכפתור המדפסת שבתוך התצוגה'); }
+        catch (e) { openViewer(f, outUrl, isImage); showToast('להדפסה — השתמשו בכפתור המדפסת שבתוך התצוגה'); }
       };
-    } catch (e) { openViewer(f, url, isImage); }
+    } catch (e) { openViewer(f, outUrl, isImage); }
     return;
   }
 
@@ -754,14 +1044,54 @@ document.getElementById('viewer').addEventListener('click', e => { if (e.target.
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeViewer(); });
 document.getElementById('brandHome').addEventListener('click', goHome);
 document.getElementById('brandHome').addEventListener('keydown', e => { if (e.key === 'Enter') goHome(); });
-document.getElementById('loginBtn').addEventListener('click', () => tryLogin(document.getElementById('licenseInput').value));
-document.getElementById('licenseInput').addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(e.target.value); });
+/* ---------- תנאי שימוש: חובה לאשר לפני כניסה ---------- */
+const TERMS_VERSION = '1.0';
+const termsModal = document.getElementById('termsModal');
+const termsCheck = document.getElementById('termsCheck');
+
+function openTerms() { termsModal.classList.add('open'); document.getElementById('termsBody').scrollTop = 0; }
+function closeTerms() { termsModal.classList.remove('open'); }
+
+document.getElementById('termsOpen').addEventListener('click', openTerms);
+document.getElementById('termsClose').addEventListener('click', closeTerms);
+document.getElementById('termsDismiss').addEventListener('click', closeTerms);
+document.getElementById('termsAgree').addEventListener('click', () => {
+  termsCheck.checked = true;
+  localStorage.setItem('lma_terms', TERMS_VERSION);
+  closeTerms();
+  document.getElementById('loginError').style.display = 'none';
+});
+termsModal.addEventListener('click', e => { if (e.target === termsModal) closeTerms(); });
+termsCheck.addEventListener('change', () => {
+  if (termsCheck.checked) localStorage.setItem('lma_terms', TERMS_VERSION);
+  else localStorage.removeItem('lma_terms');
+  document.getElementById('loginError').style.display = 'none';
+});
+
+function termsOk() {
+  if (termsCheck.checked) return true;
+  const err = document.getElementById('loginError');
+  err.textContent = 'יש לאשר את תנאי השימוש לפני הכניסה.';
+  err.style.display = 'block';
+  termsModal.classList.contains('open') || openTerms();
+  return false;
+}
+
+function attemptLogin(code) { if (!termsOk()) return; tryLogin(code); }
+
+document.getElementById('loginBtn').addEventListener('click', () => attemptLogin(document.getElementById('licenseInput').value));
+document.getElementById('licenseInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(e.target.value); });
 document.getElementById('logoutBtn').addEventListener('click', logout);
 document.getElementById('searchInput').addEventListener('input', filterCards);
 document.getElementById('coverImg').src = COVER_IMG;
 
 const saved = localStorage.getItem('lma_license');
-if (saved) { document.getElementById('licenseInput').value = saved; tryLogin(saved, true); }
+const savedTerms = localStorage.getItem('lma_terms') === TERMS_VERSION;
+if (savedTerms) termsCheck.checked = true;
+if (saved) {
+  document.getElementById('licenseInput').value = saved;
+  if (savedTerms) tryLogin(saved, true);
+}
 
 </script>
 </body>
