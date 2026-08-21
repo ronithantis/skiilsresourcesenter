@@ -712,15 +712,19 @@ function openLesson(id) {
     </div>` : '';
 
   const rubricHtml = buildRubric(l);
-  const filesHtml = l.files.length ? l.files.map(f => `
+  const filesHtml = l.files.length ? l.files.map(f => {
+    const fIsImage = /תמונה/.test(f.type || '');
+    const viewLabel = fIsImage ? 'תצוגה מקדימה' : 'פתיחה';
+    return `
       <div class="file-row">
         <span class="fname">${f.name}</span><span class="ftype">${f.type || ''}</span>
         <div class="file-actions">
-          <button class="btn btn-ghost" onclick="fileAction(${l.id},'${f.id}','view')">תצוגה מקדימה</button>
+          <button class="btn btn-ghost" onclick="fileAction(${l.id},'${f.id}','view')">${viewLabel}</button>
           <button class="btn btn-ghost" onclick="fileAction(${l.id},'${f.id}','download')">הורדה</button>
           <button class="btn btn-ghost" onclick="fileAction(${l.id},'${f.id}','print')">הדפסה</button>
         </div>
-      </div>`).join('')
+      </div>`;
+  }).join('')
     : `<div class="files-empty">חומרי ההדפסה לשיעור זה יתווספו בקרוב.</div>`;
 
   v.innerHTML = `
@@ -1153,7 +1157,21 @@ async function fileAction(lessonId, fileId, action) {
     return;
   }
 
-  openViewer(f, url, isImage); // תצוגה מקדימה — בתוך המערכת, ללא חלונות קופצים
+  // תצוגה מקדימה:
+  // תמונות — נפתחות ב-viewer עם גלילה (אין להן סרגל כלים בעייתי).
+  // PDF — לא נפתח ב-viewer (קורא ה-PDF של הדפדפן חושף חץ הורדה שעוקף את סימן המים);
+  //        במקום זה מורידים ישירות עם סימן מים.
+  if (isImage) {
+    openViewer(f, url, isImage);
+  } else {
+    showToast('מכין את הקובץ עם סימן מים…');
+    let outUrl = url;
+    try { outUrl = await wmFile(f, url, isImage); } catch (e) { outUrl = url; }
+    const a = document.createElement('a'); a.href = outUrl;
+    a.download = f.name + '.pdf';
+    a.click();
+    showToast('הקובץ ירד עם סימן מים');
+  }
 }
 
 function openViewer(f, url, isImage) {
