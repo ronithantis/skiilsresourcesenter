@@ -215,8 +215,9 @@ main{max-width:1200px; margin:0 auto; padding:34px 24px 80px;}
 .viewer-head{display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--line);}
 .viewer-head .vname{font-weight:800; color:var(--blue-900); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 .viewer-head .btn{min-height:42px; padding:0 16px; font-size:15px;}
-.viewer-body{flex:1; background:#39414d;}
-.viewer-body iframe, .viewer-body img{width:100%; height:100%; border:0; object-fit:contain; display:block;}
+.viewer-body{flex:1; background:#39414d; overflow:auto; -webkit-overflow-scrolling:touch;}
+.viewer-body img{width:100%; height:auto; border:0; display:block;}
+.viewer-body iframe{width:100%; height:100%; min-height:100%; border:0; display:block;}
 .toast{position:fixed; bottom:26px; right:50%; transform:translate(50%,20px); background:var(--blue-900); color:#fff; padding:12px 24px; border-radius:999px; font-weight:700; opacity:0; pointer-events:none; transition:all .25s ease; z-index:99;}
 .toast.show{opacity:1; transform:translate(50%,0);}
 .hidden{display:none!important;}
@@ -1160,8 +1161,14 @@ function openViewer(f, url, isImage) {
   document.getElementById('viewerBody').innerHTML = isImage
     ? `<img src="${url}" alt="${f.name}">`
     : `<iframe src="${url}#toolbar=1" title="${f.name}"></iframe>`;
-  document.getElementById('viewerDownload').onclick = () => {
-    const a = document.createElement('a'); a.href = url; a.download = f.name + (isImage ? '.jpg' : '.pdf'); a.click();
+  document.getElementById('viewerDownload').onclick = async () => {
+    /* הורדה מהתצוגה — עוברת דרך סימן המים, בדיוק כמו כפתור ההורדה הראשי */
+    showToast('מכין את הקובץ…');
+    let outUrl = url;
+    try { outUrl = await wmFile(f, url, isImage); }
+    catch (e) { outUrl = url; }
+    const a = document.createElement('a'); a.href = outUrl; a.download = f.name + (isImage ? '.jpg' : '.pdf'); a.click();
+    showToast('הקובץ ירד למחשב');
   };
   document.getElementById('viewer').classList.add('open');
   document.body.style.overflow = 'hidden';
