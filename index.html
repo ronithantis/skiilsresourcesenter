@@ -1160,7 +1160,7 @@ function openViewer(f, url, isImage) {
   document.getElementById('viewerName').textContent = f.name;
   document.getElementById('viewerBody').innerHTML = isImage
     ? `<img src="${url}" alt="${f.name}">`
-    : `<iframe src="${url}#toolbar=1" title="${f.name}"></iframe>`;
+    : `<iframe src="${url}#toolbar=0&navpanes=0" title="${f.name}"></iframe>`;
   document.getElementById('viewerDownload').onclick = async () => {
     /* הורדה מהתצוגה — עוברת דרך סימן המים, בדיוק כמו כפתור ההורדה הראשי */
     showToast('מכין את הקובץ…');
