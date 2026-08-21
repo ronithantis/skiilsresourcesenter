@@ -983,8 +983,10 @@ function wmFooterOnly(f) {
   return /דף עבודה|דף גזירה/.test((f && f.type) || '');
 }
 
-/* מצייר את שכבת סימן המים על גבי קנבס נתון */
-function wmPaint(ctx, w, h, footerOnly) {
+/* מצייר את שכבת סימן המים על גבי קנבס נתון
+   footerOnly = פס תחתון בלבד (דפי עבודה)
+   noFooter   = אלכסוני בלבד, בלי פס תחתון (תמונות/כרטיסיות/כרזות שהוכנו מראש) */
+function wmPaint(ctx, w, h, footerOnly, noFooter) {
   const line = wmLine();
   const base = Math.max(w, h);
 
@@ -1006,7 +1008,10 @@ function wmPaint(ctx, w, h, footerOnly) {
     ctx.restore();
   }
 
-  /* פס תחתון — תמיד */
+  /* בתמונות/כרטיסיות שהוכנו מראש — מדלגים על הפס התחתון כדי לא לכסות תוכן */
+  if (noFooter) return;
+
+  /* פס תחתון */
   const fs = Math.max(9, Math.round(base * 0.0125));
   const pad = Math.round(fs * 0.7);
   const barH = fs * 2 + pad * 2;
@@ -1029,7 +1034,7 @@ function wmPaint(ctx, w, h, footerOnly) {
 }
 
 /* תמונה + סימן מים -> blob URL חדש */
-function wmImage(url, footerOnly) {
+function wmImage(url, footerOnly, noFooter) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -1037,7 +1042,7 @@ function wmImage(url, footerOnly) {
       c.width = img.naturalWidth; c.height = img.naturalHeight;
       const ctx = c.getContext('2d');
       ctx.drawImage(img, 0, 0);
-      wmPaint(ctx, c.width, c.height, footerOnly);
+      wmPaint(ctx, c.width, c.height, footerOnly, noFooter);
       c.toBlob(b => b ? resolve(URL.createObjectURL(b)) : reject(new Error('blob')), 'image/jpeg', 0.92);
     };
     img.onerror = () => reject(new Error('image'));
@@ -1062,7 +1067,7 @@ function loadPdfLib() {
 }
 
 /* PDF + סימן מים: מייצרים שכבת PNG שקופה בקנבס (עברית נכונה!) ומטמיעים בכל עמוד */
-async function wmPdf(url, footerOnly) {
+async function wmPdf(url, footerOnly, noFooter) {
   const PDFLib = await loadPdfLib();
   const bytes = await (await fetch(url)).arrayBuffer();
   const pdf = await PDFLib.PDFDocument.load(bytes);
@@ -1078,7 +1083,7 @@ async function wmPdf(url, footerOnly) {
       c.height = Math.round(height * scale);
       const ctx = c.getContext('2d');
       ctx.scale(scale, scale);
-      wmPaint(ctx, width, height, footerOnly);
+      wmPaint(ctx, width, height, footerOnly, noFooter);
       const blob = await new Promise(r => c.toBlob(r, 'image/png'));
       cache[key] = await pdf.embedPng(await blob.arrayBuffer());
     }
@@ -1091,8 +1096,11 @@ async function wmPdf(url, footerOnly) {
 /* מחזיר URL עם סימן מים; אם משהו נכשל — מחזיר את המקורי */
 async function wmFile(f, url, isImage) {
   const footerOnly = wmFooterOnly(f);
+  /* תמונות/כרטיסיות/כרזות שהוכנו מראש (type מכיל "תמונה") — אלכסוני בלבד, בלי פס תחתון.
+     מחוונים ומסמכי PDF שהופקו במערכת — נשאר אלכסוני + פס תחתון כרגיל. */
+  const noFooter = isImage;
   try {
-    return isImage ? await wmImage(url, footerOnly) : await wmPdf(url, footerOnly);
+    return isImage ? await wmImage(url, footerOnly, noFooter) : await wmPdf(url, footerOnly, noFooter);
   } catch (e) {
     showToast('סימן המים לא הוטמע (בדקו חיבור לאינטרנט) — הקובץ יסופק כמות שהוא');
     return url;
