@@ -221,6 +221,51 @@ main{max-width:1200px; margin:0 auto; padding:34px 24px 80px;}
 .toast{position:fixed; bottom:26px; right:50%; transform:translate(50%,20px); background:var(--blue-900); color:#fff; padding:12px 24px; border-radius:999px; font-weight:700; opacity:0; pointer-events:none; transition:all .25s ease; z-index:99;}
 .toast.show{opacity:1; transform:translate(50%,0);}
 .hidden{display:none!important;}
+/* ===== חבילת חצי שנתי: בחירת מיומנויות ===== */
+.sel-btn{display:inline-flex; align-items:center; gap:10px; background:#C0392B; color:#fff; font-weight:800; font-size:15px; border-radius:999px; padding:8px 18px; box-shadow:0 4px 14px rgba(192,57,43,.3); white-space:nowrap;}
+.sel-btn:hover{background:#A93226;}
+.sel-btn .sel-timer{background:rgba(255,255,255,.2); border-radius:999px; padding:1px 10px; font-variant-numeric:tabular-nums; direction:ltr;}
+.sel-btn.urgent{animation:selPulse 1.6s ease-in-out infinite;}
+@keyframes selPulse{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.55);}50%{box-shadow:0 0 0 9px rgba(192,57,43,0);}}
+.sel-banner{border-radius:var(--r-md); padding:14px 18px; margin-bottom:20px; font-weight:600; line-height:1.6; display:flex; gap:12px; align-items:center;}
+.sel-banner svg{width:24px; height:24px; flex:none;}
+.sel-banner.info{background:#FDF1F0; border:1.5px solid #E8B4AE; color:#7E2A21;}
+.sel-banner.lock{background:#FBECEC; border:1.5px solid #E4A0A0; color:#8a1f1f;}
+.card.is-picked{border:2.5px solid #C0392B; box-shadow:0 0 0 3px rgba(192,57,43,.08);}
+.card.is-locked{background:#F4F6F9; border-style:dashed;}
+.card.is-locked h3,.card.is-locked .desc{opacity:.55;}
+.card.is-locked .tile{background:#E6EAF0; color:#9AA7B6;}
+.card.is-locked:hover{transform:none; box-shadow:none;}
+.lock-chip{display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:3px 12px; font-weight:700; font-size:12.5px; background:#E6EAF0; color:#5B6B7E;}
+.lock-chip svg{width:14px; height:14px;}
+.pick-chip{border-radius:999px; padding:3px 12px; font-weight:700; font-size:12.5px; background:#FDF1F0; color:#C0392B;}
+#selModal{position:fixed; inset:0; background:rgba(12,24,42,.6); display:none; align-items:flex-start; justify-content:center; padding:28px 14px; z-index:300; overflow-y:auto;}
+#selModal.open{display:flex;}
+.sel-box{background:#fff; border-radius:var(--r-lg); max-width:880px; width:100%; padding:26px 28px; box-shadow:0 24px 70px rgba(0,0,0,.35);}
+.sel-box h3{font-weight:900; font-size:24px; color:var(--blue-900); margin-bottom:4px;}
+.sel-box .sel-sub{color:var(--muted); margin-bottom:14px;}
+.sel-head{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:14px;}
+.sel-count{font-weight:900; font-size:18px; color:var(--blue-900); background:var(--blue-100); border-radius:999px; padding:4px 16px;}
+.sel-count.full{background:#FDF1F0; color:#C0392B;}
+.sel-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:8px;}
+.sel-item{display:flex; align-items:center; gap:10px; border:2px solid var(--line); border-radius:var(--r-sm); padding:10px 12px; cursor:pointer; text-align:right; background:#fff; font-size:15px; transition:border-color .12s;}
+.sel-item:hover{border-color:#E8B4AE;}
+.sel-item .box{width:22px; height:22px; border-radius:6px; border:2px solid #C9D5E4; flex:none; display:flex; align-items:center; justify-content:center; color:#fff;}
+.sel-item .box svg{width:15px; height:15px;}
+.sel-item .n{font-weight:900; color:var(--blue-900); min-width:24px;}
+.sel-item.on{border-color:#C0392B; background:#FDF1F0;}
+.sel-item.on .box{background:#C0392B; border-color:#C0392B;}
+.sel-item.full{opacity:.45; cursor:not-allowed;}
+.sel-actions{display:flex; gap:10px; justify-content:flex-start; margin-top:18px; flex-wrap:wrap;}
+.sel-actions .btn[disabled]{opacity:.45; cursor:not-allowed;}
+.btn-red{background:#C0392B; color:#fff; box-shadow:0 4px 14px rgba(192,57,43,.28);}
+.btn-red:hover{background:#A93226;}
+.sel-sum{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:6px 18px; margin:6px 0 4px;}
+.sel-sum div{padding:6px 0; border-bottom:1px solid var(--line); font-size:15px;}
+.sel-sum b{color:#C0392B; margin-left:6px;}
+.sel-msg{text-align:center; padding:10px 0;}
+.sel-msg svg{width:46px; height:46px; color:#9AA7B6; margin-bottom:8px;}
+
 
 footer{max-width:1200px; margin:0 auto; padding:0 24px 40px; color:var(--muted); font-size:14px; display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap;}
 </style>
@@ -362,6 +407,7 @@ footer{max-width:1200px; margin:0 auto; padding:0 24px 40px; color:var(--muted);
   <div class="app-bar">
     <div class="brand" id="brandHome" role="button" tabindex="0" title="חזרה לכל המיומנויות" onclick="goHome()"><span class="dot">30</span><span>האקדמיה למיומנויות החיים</span></div>
     <span class="school-chip" id="schoolChip"></span>
+    <button class="sel-btn hidden" id="selBtn" onclick="openSel()">לבחירת המיומנויות <span class="sel-timer" id="selTimer"></span></button>
     <div class="spacer"></div>
     <div id="searchBox">
       <input id="searchInput" placeholder="חיפוש מיומנות…" autocomplete="off">
@@ -374,6 +420,7 @@ footer{max-width:1200px; margin:0 auto; padding:0 24px 40px; color:var(--muted);
 <main>
   <!-- HOME -->
   <div id="viewHome">
+    <div class="sel-banner hidden" id="selBanner"></div>
     <div class="home-head">
       <div>
         <h2>30 מיומנויות לחיים ולעתיד</h2>
@@ -412,6 +459,7 @@ footer{max-width:1200px; margin:0 auto; padding:0 24px 40px; color:var(--muted);
 </div>
 
 <div class="toast" id="toast"></div>
+<div id="selModal"><div class="sel-box" id="selBox"></div></div>
 
 <!-- print frame -->
 <iframe id="printFrame" style="display:none"></iframe>
@@ -592,6 +640,7 @@ async function tryLogin(code, silent) {
   try {
     await loadContent();
     await loadProgress();
+    await loadSelection();
   } catch (e) {
     if (!silent) { err.textContent = 'התוכן לא נטען. בדקו את החיבור ונסו שוב.'; err.style.display = 'block'; }
     return false;
@@ -658,13 +707,13 @@ function statusChip(l) {
 function buildGrid() {
   const g = document.getElementById('cardGrid');
   g.innerHTML = DATA.lessons.map((l, i) => `
-    <article class="card${isDone(l.id) ? ' is-done' : ''}">
+    <article class="card${isDone(l.id) ? ' is-done' : ''}${l.locked ? ' is-locked' : ''}${isPicked(l.id) ? ' is-picked' : ''}">
       <div class="tile">${ICONS[i] || ICONS[0]}<span class="num">${String(l.id).padStart(2, '0')}</span></div>
       <h3>${l.title}</h3>
       <p class="desc">${l.summary.what}</p>
       <div class="row">
-        ${isDone(l.id) ? '<span class="done-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>הועבר</span>' : statusChip(l)}
-        <button class="open" onclick="openLesson(${l.id})">פתיחת השיעור
+        ${l.locked ? `<span class="lock-chip">${LOCK_SVG}לא כלול בחבילה</span>` : isPicked(l.id) && !isDone(l.id) ? '<span class="pick-chip">בחבילה שלכם</span>' : isDone(l.id) ? '<span class="done-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>הועבר</span>' : statusChip(l)}
+        <button class="open" onclick="openLesson(${l.id})">${l.locked ? 'נעול' : 'פתיחת השיעור'}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 12H5"/><path d="M11 18l-6-6 6-6"/></svg>
         </button>
       </div>
@@ -686,6 +735,7 @@ function filterCards() {
 /* ---------- דף שיעור ---------- */
 function openLesson(id) {
   const l = DATA.lessons.find(x => x.id === id);
+  if (l && l.locked) { lockedLesson(); return; }
   const idx = DATA.lessons.indexOf(l);
   const v = document.getElementById('viewLesson');
   /* בגישת מנחה צעיר קיים שיעור אחד בלבד — אין ניווט קודם/הבא */
@@ -1196,6 +1246,160 @@ function closeViewer() {
   document.getElementById('viewer').classList.remove('open');
   document.getElementById('viewerBody').innerHTML = '';
   document.body.style.overflow = '';
+}
+
+/* =====================================================================
+   חבילת חצי שנתי — בחירת 15 מיומנויות (חלון זמן שרונית פותחת)
+   כל הנעילה נאכפת בשרת (get_content / get_file); כאן רק התצוגה.
+   ===================================================================== */
+const SEL_QUOTA = 15;
+const LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>';
+let SEL = null, SEL_OFFSET = 0, SEL_TICK = null, SEL_DRAFT = [], SEL_SAVE_T = null;
+
+async function loadSelection() {
+  try {
+    SEL = await rpc('get_selection', { p_code: SESSION.code });
+    if (SEL && SEL.now) SEL_OFFSET = new Date(SEL.now).getTime() - Date.now();
+  } catch (e) { SEL = null; }          /* אם הפונקציה לא קיימת — המערכת מתנהגת כמו תמיד */
+  renderSelUI();
+}
+function isPicked(id) {
+  return !!(SEL && SEL.state === 'done' && (SEL.selected || []).includes(id));
+}
+function selRemaining() {
+  if (!SEL || !SEL.until) return 0;
+  return new Date(SEL.until).getTime() - (Date.now() + SEL_OFFSET);
+}
+function fmtLeft(ms) {
+  if (ms <= 0) return '00:00:00';
+  const s = Math.floor(ms / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600),
+        m = Math.floor(s % 3600 / 60), sec = s % 60, p = n => String(n).padStart(2, '0');
+  return d ? `${d} ${d === 1 ? 'יום' : 'ימים'} · ${p(h)}:${p(m)}` : `${p(h)}:${p(m)}:${p(sec)}`;
+}
+function renderSelUI() {
+  const btn = document.getElementById('selBtn'), ban = document.getElementById('selBanner');
+  if (!btn || !ban) return;
+  clearInterval(SEL_TICK);
+  const st = SEL && SEL.state;
+  btn.classList.toggle('hidden', st !== 'selecting');
+  if (st === 'selecting') {
+    ban.className = 'sel-banner info';
+    ban.innerHTML = `${LOCK_SVG}<span>חלון בחירת המיומנויות פתוח — כל השיעורים פתוחים לעיון. כשתחליטו, לחצו על <b>"לבחירת המיומנויות"</b> ובחרו ${SEL_QUOTA} שיעורים.</span>`;
+    const tick = () => {
+      const left = selRemaining();
+      document.getElementById('selTimer').textContent = fmtLeft(left);
+      btn.classList.toggle('urgent', left < 86400000);
+      if (left <= 0) { clearInterval(SEL_TICK); selTimeUp(); }
+    };
+    tick(); SEL_TICK = setInterval(tick, 1000);
+  } else if (st === 'expired') {
+    ban.className = 'sel-banner lock';
+    ban.innerHTML = `${LOCK_SVG}<span>זמן בחירת המיומנויות הסתיים. להמשך — פנו אלינו.</span>`;
+  } else {
+    ban.className = 'sel-banner hidden'; ban.innerHTML = '';
+  }
+}
+async function refreshAfterSelection() {
+  try { await loadContent(); } catch (e) {}
+  await loadSelection();
+  buildGrid(); filterCards(); updateProgressChip();
+  const cur = document.getElementById('viewLesson');
+  if (cur && !cur.classList.contains('hidden')) goHome();
+}
+async function selTimeUp() {
+  closeSel();
+  await refreshAfterSelection();
+  showToast('זמן הבחירה הסתיים');
+}
+
+/* ---- סל המיומנויות ---- */
+function openSel() {
+  if (!SEL || SEL.state !== 'selecting') return;
+  SEL_DRAFT = [...(SEL.selected || [])];
+  renderSelPick();
+  document.getElementById('selModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSel() {
+  document.getElementById('selModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('selModal').addEventListener('click', e => { if (e.target.id === 'selModal') closeSel(); });
+
+function renderSelPick() {
+  const n = SEL_DRAFT.length, full = n >= SEL_QUOTA;
+  const items = DATA.lessons.map(l => {
+    const on = SEL_DRAFT.includes(l.id);
+    return `<button class="sel-item${on ? ' on' : ''}${!on && full ? ' full' : ''}" onclick="toggleSel(${l.id})">
+      <span class="box">${on ? CHECK_SVG : ''}</span><span class="n">${l.id}</span><span>${l.title}</span></button>`;
+  }).join('');
+  document.getElementById('selBox').innerHTML = `
+    <h3>סל המיומנויות</h3>
+    <p class="sel-sub">בחרו ${SEL_QUOTA} שיעורים לחבילה שלכם. הבחירה נשמרת אוטומטית — אפשר לסגור ולחזור. נותרו ${fmtLeft(selRemaining())}.</p>
+    <div class="sel-head"><span class="sel-count${full ? ' full' : ''}">נבחרו ${n} מתוך ${SEL_QUOTA}</span></div>
+    <div class="sel-grid">${items}</div>
+    <div class="sel-actions">
+      <button class="btn btn-red" ${n === SEL_QUOTA ? '' : 'disabled'} onclick="reviewSel()">השלמת הבחירה</button>
+      <button class="btn btn-ghost" onclick="closeSel()">סגירה</button>
+    </div>`;
+}
+function toggleSel(id) {
+  if (SEL_DRAFT.includes(id)) SEL_DRAFT = SEL_DRAFT.filter(x => x !== id);
+  else {
+    if (SEL_DRAFT.length >= SEL_QUOTA) { showToast('אפשר לבחור עד ' + SEL_QUOTA + ' שיעורים — הסירו שיעור כדי להוסיף אחר'); return; }
+    SEL_DRAFT = [...SEL_DRAFT, id].sort((a, b) => a - b);
+  }
+  renderSelPick();
+  clearTimeout(SEL_SAVE_T);
+  SEL_SAVE_T = setTimeout(async () => {
+    try {
+      const res = await rpc('save_selection', { p_code: SESSION.code, p_lessons: SEL_DRAFT });
+      if (res) { SEL = res; if (res.state !== 'selecting') { closeSel(); refreshAfterSelection(); } }
+    } catch (e) { showToast('הבחירה לא נשמרה — בדקו את חיבור האינטרנט'); }
+  }, 500);
+}
+function reviewSel() {
+  if (SEL_DRAFT.length !== SEL_QUOTA) return;
+  const rows = SEL_DRAFT.map(id => {
+    const l = DATA.lessons.find(x => x.id === id);
+    return `<div><b>${id}</b>${l ? l.title : ''}</div>`;
+  }).join('');
+  document.getElementById('selBox').innerHTML = `
+    <h3>אלה ${SEL_QUOTA} השיעורים שבחרתם</h3>
+    <p class="sel-sub">אחרי ההשלמה ייפתחו לכם השיעורים האלה, ושאר השיעורים יוצגו כלא כלולים בחבילה.</p>
+    <div class="sel-sum">${rows}</div>
+    <div class="sel-actions">
+      <button class="btn btn-red" id="selDoneBtn" onclick="completeSel()">השלמת הבחירה</button>
+      <button class="btn btn-ghost" onclick="renderSelPick()">חזרה לעריכה</button>
+    </div>`;
+}
+async function completeSel() {
+  const b = document.getElementById('selDoneBtn'); if (b) b.disabled = true;
+  clearTimeout(SEL_SAVE_T);
+  try {
+    const res = await rpc('complete_selection', { p_code: SESSION.code, p_lessons: SEL_DRAFT });
+    if (!res || res.error) {
+      showToast(res && res.error === 'need_15' ? 'יש לבחור בדיוק ' + SEL_QUOTA + ' שיעורים' : 'זמן הבחירה הסתיים — פנו אלינו');
+      if (b) b.disabled = false;
+      if (res && res.state && res.state !== 'selecting') { closeSel(); refreshAfterSelection(); }
+      return;
+    }
+    closeSel();
+    await refreshAfterSelection();
+    showToast('הבחירה הושלמה — השיעורים שלכם מסומנים במסגרת אדומה');
+  } catch (e) { showToast('הבחירה לא נשמרה — בדקו את חיבור האינטרנט'); if (b) b.disabled = false; }
+}
+
+/* ---- לחיצה על שיעור נעול ---- */
+function lockedLesson() {
+  document.getElementById('selBox').innerHTML = `
+    <div class="sel-msg">${LOCK_SVG}
+      <h3>השיעור אינו כלול בחבילה שלכם</h3>
+      <p class="sel-sub">לפרטים על הרחבת החבילה — פנו אלינו.</p>
+      <div class="sel-actions" style="justify-content:center"><button class="btn btn-primary" onclick="closeSel()">הבנתי</button></div>
+    </div>`;
+  document.getElementById('selModal').classList.add('open');
 }
 
 function showToast(msg) {
