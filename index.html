@@ -224,7 +224,8 @@ main{max-width:1200px; margin:0 auto; padding:34px 24px 80px;}
 /* ===== חבילת חצי שנתי: בחירת מיומנויות ===== */
 .sel-btn{display:inline-flex; align-items:center; gap:10px; background:#C0392B; color:#fff; font-weight:800; font-size:15px; border-radius:999px; padding:8px 18px; box-shadow:0 4px 14px rgba(192,57,43,.3); white-space:nowrap;}
 .sel-btn:hover{background:#A93226;}
-.sel-btn .sel-timer{background:rgba(255,255,255,.2); border-radius:999px; padding:1px 10px; font-variant-numeric:tabular-nums; direction:ltr;}
+.sel-btn .sel-timer{background:rgba(255,255,255,.22); border-radius:999px; padding:2px 12px; font-weight:700;}
+.sel-banner .sel-deadline{display:block; margin-top:4px; font-weight:800;}
 .sel-btn.urgent{animation:selPulse 1.6s ease-in-out infinite;}
 @keyframes selPulse{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.55);}50%{box-shadow:0 0 0 9px rgba(192,57,43,0);}}
 .sel-banner{border-radius:var(--r-md); padding:14px 18px; margin-bottom:20px; font-weight:600; line-height:1.6; display:flex; gap:12px; align-items:center;}
@@ -1272,10 +1273,24 @@ function selRemaining() {
   return new Date(SEL.until).getTime() - (Date.now() + SEL_OFFSET);
 }
 function fmtLeft(ms) {
-  if (ms <= 0) return '00:00:00';
-  const s = Math.floor(ms / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600),
-        m = Math.floor(s % 3600 / 60), sec = s % 60, p = n => String(n).padStart(2, '0');
-  return d ? `${d} ${d === 1 ? 'יום' : 'ימים'} · ${p(h)}:${p(m)}` : `${p(h)}:${p(m)}:${p(sec)}`;
+  if (ms <= 0) return 'הזמן נגמר';
+  const h = Math.floor(ms / 3600000), m = Math.floor(ms % 3600000 / 60000);
+  if (h) return (h === 1 ? 'שעה אחת' : h + ' שעות') + (m ? ' ו-' + m + ' דקות' : '');
+  return m ? m + ' דקות' : 'פחות מדקה';
+}
+function fmtLeftHTML(ms) {
+  /* בכפתור: מילים בלבד, בלי נקודתיים. "נותרו 71 שעות" / בשעה האחרונה: "נותרו 45 דקות" */
+  if (ms <= 0) return 'הזמן נגמר';
+  const h = Math.floor(ms / 3600000), m = Math.ceil(ms % 3600000 / 60000);
+  if (h >= 2) return 'נותרו ' + h + ' שעות';
+  if (h === 1) return 'נותרה שעה אחת';
+  if (m >= 2) return 'נותרו ' + m + ' דקות';
+  return 'נותרה דקה אחת';
+}
+function fmtDeadline(until) {
+  /* "יום שבת, 4.10, בשעה 12:30" */
+  const d = new Date(until), p = n => String(n).padStart(2, '0');
+  return `${d.toLocaleDateString('he-IL', { weekday: 'long' })}, ${d.getDate()}.${d.getMonth() + 1}, בשעה ${p(d.getHours())}:${p(d.getMinutes())}`;
 }
 function renderSelUI() {
   const btn = document.getElementById('selBtn'), ban = document.getElementById('selBanner');
@@ -1285,11 +1300,11 @@ function renderSelUI() {
   btn.classList.toggle('hidden', st !== 'selecting');
   if (st === 'selecting') {
     ban.className = 'sel-banner info';
-    ban.innerHTML = `${LOCK_SVG}<span>חלון בחירת המיומנויות פתוח — כל השיעורים פתוחים לעיון. כשתחליטו, לחצו על <b>"לבחירת המיומנויות"</b> ובחרו ${SEL_QUOTA} שיעורים.</span>`;
+    ban.innerHTML = `${LOCK_SVG}<span>חלון בחירת המיומנויות פתוח — כל השיעורים פתוחים לעיון. כשתחליטו, לחצו על <b>"לבחירת המיומנויות"</b> ובחרו ${SEL_QUOTA} שיעורים.<span class="sel-deadline">הבחירה פתוחה עד ${fmtDeadline(SEL.until)}</span></span>`;
     const tick = () => {
       const left = selRemaining();
-      document.getElementById('selTimer').textContent = fmtLeft(left);
-      btn.classList.toggle('urgent', left < 86400000);
+      document.getElementById('selTimer').innerHTML = fmtLeftHTML(left);
+      btn.classList.toggle('urgent', left < 3600000);
       if (left <= 0) { clearInterval(SEL_TICK); selTimeUp(); }
     };
     tick(); SEL_TICK = setInterval(tick, 1000);
@@ -1336,7 +1351,7 @@ function renderSelPick() {
   }).join('');
   document.getElementById('selBox').innerHTML = `
     <h3>סל המיומנויות</h3>
-    <p class="sel-sub">בחרו ${SEL_QUOTA} שיעורים לחבילה שלכם. הבחירה נשמרת אוטומטית — אפשר לסגור ולחזור. נותרו ${fmtLeft(selRemaining())}.</p>
+    <p class="sel-sub">בחרו ${SEL_QUOTA} שיעורים לחבילה שלכם. הבחירה נשמרת אוטומטית — אפשר לסגור ולחזור. הבחירה פתוחה עד ${fmtDeadline(SEL.until)}.</p>
     <div class="sel-head"><span class="sel-count${full ? ' full' : ''}">נבחרו ${n} מתוך ${SEL_QUOTA}</span></div>
     <div class="sel-grid">${items}</div>
     <div class="sel-actions">
